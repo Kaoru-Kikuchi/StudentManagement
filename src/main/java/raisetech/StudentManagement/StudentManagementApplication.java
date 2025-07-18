@@ -1,76 +1,51 @@
 package raisetech.StudentManagement;
 
-import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Empty;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @SpringBootApplication
 @RestController
 public class StudentManagementApplication {
 
-	private String name ;
-	private String age ;
-	private String address;
-	private String school;
-	private Map<String,String> infoMap = new HashMap<>();
+	@Autowired
+	private StudentRepository repository;
+
+	private String name ="Enami Kouji";
+	private String age = "37";
 
 	public static void main(String[] args) {
 		SpringApplication.run(StudentManagementApplication.class, args);
 	}
-	@GetMapping("/studentInfo")
-	public String getStudentInfo() {
-		return "名前: " + name + "\n年齢: " + age + "歳\n住所: " + address + "\n学校: " + school;
+
+	@GetMapping("/student")
+	public String getStudent(@RequestParam("name")String name) {
+		Student student = repository.searchByName(name);
+		if (student == null) {
+			return name + "は登録されていません。";
+		}
+		return student.getName() + " " + student.getAge() + "歳";
 	}
 
-	@GetMapping("/studentInfoMap")
-	public Map<String, String> getStudentInfoMap() {
-		return infoMap;
+	@PostMapping("/student")
+	public void registerStudent(String name,int age) {
+		repository.registerStudent(name,age);
 	}
 
-	@PostMapping("/studentInfo")
-	public void setStudentInfo(String name, String age, String address, String school) {
-		if (StringUtils.isNotBlank(name)) {
-			this.name = name;
-			infoMap.put("name", name);
-		}
-		if (StringUtils.isNotBlank(age)) {
-			this.age = age;
-			infoMap.put("age", age);
-		}
-		if (StringUtils.isNotBlank(address)) {
-			this.address = address;
-			infoMap.put("address", address);
-		}
-		if (StringUtils.isNotBlank(school)) {
-			this.school = school;
-			infoMap.put("school", school);
-		}
+	@PatchMapping("/student")
+	public void updateStudent(String name,int age) {
+		repository.updateStudent(name,age);
 	}
 
-	@PostMapping("/studentName")
-	public void updateStudentName(String name) {
-		this.name = name;
-		infoMap.put("name",name);
-	}
-	@PostMapping("/studentAge")
-	public void updateStudentAge(String age) {
-		this.age =age;
-		infoMap.put("age",age);
-	}
-	@PostMapping("/studentAddress")
-	public void updateStudentAddress(String address) {
-		this.address = address;
-		infoMap.put("address",address);
-	}
-	@PostMapping("/studentSchool")
-	public void updateStudentSchool(String school) {
-		this.school = school;
-		infoMap.put("school",school);
+	@DeleteMapping("/student")
+	public void deleteStudent(String name) {
+		repository.deleteStudent(name);
 	}
 }
