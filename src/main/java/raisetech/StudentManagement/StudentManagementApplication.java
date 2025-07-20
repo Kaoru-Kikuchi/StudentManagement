@@ -1,5 +1,6 @@
 package raisetech.StudentManagement;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,6 +33,11 @@ public class StudentManagementApplication {
 			return name + "は登録されていません。";
 		}
 		return student.getName() + " " + student.getAge() + "歳";
+	}
+
+	@GetMapping("/students")
+	public List<Student>searchByAllName() {
+		return repository.searchByAllName();
 	}
 
 	@PostMapping("/student")
