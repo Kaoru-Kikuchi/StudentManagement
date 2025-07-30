@@ -61,4 +61,7 @@ out/
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# 個人使用
+*.txt
 >>>>>>> origin/main
