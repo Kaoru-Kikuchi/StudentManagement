@@ -20,12 +20,16 @@ public class StudentController {
 
   @GetMapping("/studentList")
   public List<Student> getStudentList() {
-    return service.searchStudentList();
+    return service.searchStudentList().stream()
+        .filter(s -> s.getAge() >= 30 && s.getAge() <= 39)
+        .toList();
   }
 
   @GetMapping("/studentCourseList")
   public List<StudentCourse> getStudentsCourseList() {
-    return service.searchStudentsCourseList();
-    }
+    return service.searchStudentsCourseList().stream()
+        .filter(c -> "Java基礎".equals(c.getCourseName()))
+        .toList();
   }
+}
 
