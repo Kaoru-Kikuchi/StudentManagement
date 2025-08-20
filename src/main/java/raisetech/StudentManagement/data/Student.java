@@ -18,4 +18,9 @@ public class Student {
   private String sex;
   private String remark;
   private boolean isDeleted;
+
+  @Override
+  public String toString() {
+    return "Student{name='" + name + "', age=" + age + "}";
+  }
 }
