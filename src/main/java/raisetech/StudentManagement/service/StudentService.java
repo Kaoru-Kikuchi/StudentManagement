@@ -24,4 +24,21 @@ public class StudentService {
   public List<StudentCourse> searchStudentsCourseList() {
     return repository.searchStudentsCourses();
   }
+
+  public void saveStudent(Student student) {
+    repository.saveStudent(student);
+  }
+
+  public void saveStudentCourse(StudentCourse studentCourse) {
+    repository.saveStudentCourse(studentCourse);
+  }
+
+  public int getMaxStudentId() {
+    return repository.findMaxStudentId(); // Repository で取得するメソッド
+  }
+
+  // 最大 student_course id を取得
+  public int getMaxStudentCourseId() {
+    return repository.findMaxStudentCourseId();
+  }
 }
