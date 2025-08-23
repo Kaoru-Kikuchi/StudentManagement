@@ -24,6 +24,10 @@ public interface StudentRepository {
   @Select("SELECT * FROM students WHERE id = #{id}")
   Student findById(@Param("id") String id);
 
+  @Select("SELECT * FROM students_courses WHERE id = #{id}")
+  StudentCourse findStudentCourseById(@Param("id") String id);
+
+
   @Select("SELECT * FROM students WHERE isDeleted = #{id}")
   List<Student> findByIsDeleted();
 

@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
@@ -88,6 +89,12 @@ public class StudentController {
 
     service.updateStudent(studentDetail);
     return "redirect:/studentList";
+  }
+
+  @PostMapping("/updateCourse")
+  public String updateCourse(@RequestBody StudentCourse studentCourse) {
+    service.updateCourse(studentCourse);
+    return "更新完了";
   }
 
 }

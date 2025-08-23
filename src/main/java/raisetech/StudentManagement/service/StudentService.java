@@ -42,13 +42,29 @@ public class StudentService {
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
 
+    // 学生情報を更新
     repository.updateStudent(studentDetail.getStudent());
 
+    // コース情報を更新
     for (StudentCourse studentCourse : studentDetail.getStudentCourse()) {
       studentCourse.setStudentId(studentDetail.getStudent().getId());
+
+      // 既存レコードを取得
+      StudentCourse existing = repository.findStudentCourseById(studentCourse.getId());
+
+      // start/end が null なら既存値をセット（最小変更）
+      if (studentCourse.getCourseStartAt() == null) {
+        studentCourse.setCourseStartAt(existing.getCourseStartAt());
+      }
+      if (studentCourse.getCourseEndAt() == null) {
+        studentCourse.setCourseEndAt(existing.getCourseEndAt());
+      }
+
+      // 更新
       repository.updateStudentCourse(studentCourse);
     }
   }
+
 
   @Transactional(readOnly = true)
   public StudentDetail getStudentDetail(String studentId) {
@@ -60,6 +76,23 @@ public class StudentService {
     detail.setStudent(student);
     detail.setStudentCourse(courses);
     return detail;
+  }
+
+  // 学生コースを更新するメソッド
+  public void updateCourse(StudentCourse studentCourse) {
+    // DB から既存の情報を取得
+    StudentCourse existing = repository.findStudentCourseById(studentCourse.getId());
+
+    // start/end が null なら既存の値をセット
+    if (studentCourse.getCourseStartAt() == null) {
+      studentCourse.setCourseStartAt(existing.getCourseStartAt());
+    }
+    if (studentCourse.getCourseEndAt() == null) {
+      studentCourse.setCourseEndAt(existing.getCourseEndAt());
+    }
+
+    // DB を更新
+    repository.updateStudentCourse(studentCourse);
   }
 
 }
