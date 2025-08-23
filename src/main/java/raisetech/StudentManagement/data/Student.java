@@ -1,6 +1,5 @@
 package raisetech.StudentManagement.data;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,10 +16,23 @@ public class Student {
   private int age;
   private String sex;
   private String remark;
-  private boolean isDeleted;
+
+  private boolean deleted;
+
+  // JavaBeans仕様に沿った getter
+  public boolean isDeleted() {
+    return deleted;
+  }
+
+  // setter
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
+
 
   @Override
   public String toString() {
     return "Student{name='" + name + "', age=" + age + "}";
   }
 }
+

@@ -1,10 +1,13 @@
 package raisetech.StudentManagement.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
+import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.repository.StudentRepository;
 
 @Service
@@ -25,20 +28,38 @@ public class StudentService {
     return repository.searchStudentsCourses();
   }
 
-  public void saveStudent(Student student) {
-    repository.saveStudent(student);
+  @Transactional
+  public void registerStudent(StudentDetail studentDetail) {
+    repository.registerStudent(studentDetail.getStudent());
+    for (StudentCourse studentCourse : studentDetail.getStudentCourse()) {
+      studentCourse.setStudentId(studentDetail.getStudent().getId());
+      studentCourse.setCourseStartAt(LocalDateTime.now());
+      studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+      repository.registerStudentsCourse(studentCourse);
+    }
   }
 
-  public void saveStudentCourse(StudentCourse studentCourse) {
-    repository.saveStudentCourse(studentCourse);
+  @Transactional
+  public void updateStudent(StudentDetail studentDetail) {
+
+    repository.updateStudent(studentDetail.getStudent());
+
+    for (StudentCourse studentCourse : studentDetail.getStudentCourse()) {
+      studentCourse.setStudentId(studentDetail.getStudent().getId());
+      repository.updateStudentCourse(studentCourse);
+    }
   }
 
-  public int getMaxStudentId() {
-    return repository.findMaxStudentId(); // Repository で取得するメソッド
+  @Transactional(readOnly = true)
+  public StudentDetail getStudentDetail(String studentId) {
+    Student student = repository.findById(studentId);
+    List<StudentCourse> courses = repository.searchStudentsCourses().stream()
+        .filter(c -> c.getStudentId().equals(student.getId()))
+        .toList();
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourse(courses);
+    return detail;
   }
 
-  // 最大 student_course id を取得
-  public int getMaxStudentCourseId() {
-    return repository.findMaxStudentCourseId();
-  }
 }
