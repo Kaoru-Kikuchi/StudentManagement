@@ -2,14 +2,17 @@ package raisetech.StudentManagement.controller;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,21 +39,23 @@ public class StudentController {
   public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
     List<StudentCourse> studentsCourses = service.searchStudentsCourseList();
+    List<Student> activeStudents = students.stream()
+        .filter(student -> !student.isDeleted())
+        .collect(Collectors.toList());
 
-    model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
-    System.out.println(students);
+    model.addAttribute("studentList",
+        converter.convertStudentDetails(activeStudents, studentsCourses));
+    System.out.println(activeStudents);
     return "studentList";
 
   }
 
-
-  @GetMapping("/studentCourseList")
-  public List<StudentCourse> getStudentsCourseList() {
-    return service.searchStudentsCourseList().stream()
-        .filter(c -> "Java基礎".equals(c.getCourseName()))
-        .toList();
+  @GetMapping("/student/{id}")
+  public String getStudent(@PathVariable String id, Model model) {
+    StudentDetail studentDetail = service.searchStudent(id);
+    model.addAttribute("studentDetail", studentDetail);
+    return "updateStudent";
   }
-
 
   @GetMapping("/newStudent")
   public String newStudent(Model model) {
@@ -60,15 +65,6 @@ public class StudentController {
     return "registerStudent";
   }
 
-  @GetMapping("/showUpdateForm")
-  public String showUpdateForm(@RequestParam("id") String studentId, Model model) {
-    StudentDetail studentDetail = service.getStudentDetail(studentId);
-    model.addAttribute("studentDetail", studentDetail);
-
-    return "updateStudent";
-  }
-
-
   @PostMapping("/registerStudent")
   public String registerStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
     if (result.hasErrors()) {
@@ -77,9 +73,8 @@ public class StudentController {
 
     service.registerStudent(studentDetail);
     return "redirect:/studentList";
-
-
   }
+
 
   @PostMapping("/updateStudent")
   public String updateStudent(@ModelAttribute StudentDetail studentDetail, BindingResult result) {
@@ -90,13 +85,6 @@ public class StudentController {
     service.updateStudent(studentDetail);
     return "redirect:/studentList";
   }
-
-  @PostMapping("/updateCourse")
-  public String updateCourse(@RequestBody StudentCourse studentCourse) {
-    service.updateCourse(studentCourse);
-    return "更新完了";
-  }
-
 }
 
 
