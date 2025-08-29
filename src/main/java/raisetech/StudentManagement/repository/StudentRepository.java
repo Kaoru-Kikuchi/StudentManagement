@@ -18,8 +18,14 @@ public interface StudentRepository {
   @Select("SELECT * FROM students")
   List<Student> search();
 
+  @Select("SELECT * FROM students WHERE id = #{id}")
+  Student searchStudent(String id);
+
   @Select("SELECT * FROM students_courses")
-  List<StudentCourse> searchStudentsCourses();
+  List<StudentCourse> searchStudentsCoursesList();
+
+  @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
+  List<StudentCourse> searchStudentsCourses(String studentId);
 
   @Select("SELECT * FROM students WHERE id = #{id}")
   Student findById(@Param("id") String id);
@@ -27,15 +33,11 @@ public interface StudentRepository {
   @Select("SELECT * FROM students_courses WHERE id = #{id}")
   StudentCourse findStudentCourseById(@Param("id") String id);
 
-
   @Select("SELECT * FROM students WHERE isDeleted = #{id}")
   List<Student> findByIsDeleted();
 
   @Select("SELECT * FROM students WHERE remark IS NOT NULL")
   List<Student> findStudentWithRemark();
-
-  @Update("UPDATE students SET IsDeleted = TRUE WHERE id = #{id}")
-  int logicallyDelete(@Param("id") int id);
 
   @Insert("INSERT INTO students (name,kana_name,nickname,email,area,age,sex,remark,isDeleted) VALUES (#{name},#{kanaName},#{nickname},#{email},#{area},#{age},#{sex},#{remark},false)")
   @Options(useGeneratedKeys = true, keyProperty = "id")
@@ -45,17 +47,10 @@ public interface StudentRepository {
   @Options(useGeneratedKeys = true, keyProperty = "id")
   void registerStudentsCourse(StudentCourse studentCourse);
 
-  @Update("UPDATE students SET name=#{name}, kana_name=#{kanaName}, nickname=#{nickname}, " +
-      "email=#{email}, area=#{area}, age=#{age}, sex=#{sex}, remark=#{remark}, isDeleted=#{deleted} "
-      +
-      "WHERE id=#{id}")
-  int updateStudent(Student student);
+  @Update("UPDATE students SET name = #{name},kana_name = #{kanaName},nickname = #{nickname},email = #{email},area = #{area},age = #{age},sex = #{sex},remark = #{remark},isDeleted = #{isDeleted} WHERE id = #{id}")
+  void updateStudent(Student student);
 
-
-  @Update(
-      "UPDATE students_courses SET course_name=#{courseName}, course_start_at=#{courseStartAt}, " +
-          "course_end_at=#{courseEndAt} WHERE id=#{id}")
-  int updateStudentCourse(StudentCourse studentCourse);
-
+  @Update("UPDATE students_courses SET course_name = #{courseName} WHERE id = #{id}")
+  void updateStudentsCourse(StudentCourse studentCourse);
 
 }

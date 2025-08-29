@@ -22,13 +22,9 @@
   <tbody>
   <tr th:each="studentDetail : ${studentList}">
     <td th:text="${studentDetail.student.id}">1</td>
-    <!-- 名前をクリックすると更新フォームに飛ぶ -->
-    <td>
-      <a th:href="@{|/showUpdateForm?id=${studentDetail.student.id}|}"
-         th:text="${studentDetail.student.name}"></a>
+    <td><a href="/studentList" th:href="@{/student/{id} (id=${studentDetail.student.id})}"
+           th:text="${studentDetail.student.name}">山田太郎</a>
     </td>
-
-
     <td th:text="${studentDetail.student.kanaName}">ヤマダタロウ</td>
     <td th:text="${studentDetail.student.nickname}">タロー</td>
     <td th:text="${studentDetail.student.email}">taro@example.com</td>

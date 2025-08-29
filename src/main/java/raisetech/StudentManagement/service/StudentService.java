@@ -24,8 +24,17 @@ public class StudentService {
     return repository.search();
   }
 
+  public StudentDetail searchStudent(String id) {
+    Student student = repository.searchStudent(id);
+    List<StudentCourse> studentCourse = repository.searchStudentsCourses(student.getId());
+    StudentDetail studentDetail = new StudentDetail();
+    studentDetail.setStudent(student);
+    studentDetail.setStudentCourse(studentCourse);
+    return studentDetail;
+  }
+
   public List<StudentCourse> searchStudentsCourseList() {
-    return repository.searchStudentsCourses();
+    return repository.searchStudentsCoursesList();
   }
 
   @Transactional
@@ -41,58 +50,10 @@ public class StudentService {
 
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
-
-    // 学生情報を更新
     repository.updateStudent(studentDetail.getStudent());
-
-    // コース情報を更新
     for (StudentCourse studentCourse : studentDetail.getStudentCourse()) {
       studentCourse.setStudentId(studentDetail.getStudent().getId());
-
-      // 既存レコードを取得
-      StudentCourse existing = repository.findStudentCourseById(studentCourse.getId());
-
-      // start/end が null なら既存値をセット（最小変更）
-      if (studentCourse.getCourseStartAt() == null) {
-        studentCourse.setCourseStartAt(existing.getCourseStartAt());
-      }
-      if (studentCourse.getCourseEndAt() == null) {
-        studentCourse.setCourseEndAt(existing.getCourseEndAt());
-      }
-
-      // 更新
-      repository.updateStudentCourse(studentCourse);
+      repository.updateStudentsCourse(studentCourse);
     }
   }
-
-
-  @Transactional(readOnly = true)
-  public StudentDetail getStudentDetail(String studentId) {
-    Student student = repository.findById(studentId);
-    List<StudentCourse> courses = repository.searchStudentsCourses().stream()
-        .filter(c -> c.getStudentId().equals(student.getId()))
-        .toList();
-    StudentDetail detail = new StudentDetail();
-    detail.setStudent(student);
-    detail.setStudentCourse(courses);
-    return detail;
-  }
-
-  // 学生コースを更新するメソッド
-  public void updateCourse(StudentCourse studentCourse) {
-    // DB から既存の情報を取得
-    StudentCourse existing = repository.findStudentCourseById(studentCourse.getId());
-
-    // start/end が null なら既存の値をセット
-    if (studentCourse.getCourseStartAt() == null) {
-      studentCourse.setCourseStartAt(existing.getCourseStartAt());
-    }
-    if (studentCourse.getCourseEndAt() == null) {
-      studentCourse.setCourseEndAt(existing.getCourseEndAt());
-    }
-
-    // DB を更新
-    repository.updateStudentCourse(studentCourse);
-  }
-
 }
