@@ -39,13 +39,9 @@ public class StudentController {
   public String getStudentList(Model model) {
     List<Student> students = service.searchStudentList();
     List<StudentCourse> studentsCourses = service.searchStudentsCourseList();
-    List<Student> activeStudents = students.stream()
-        .filter(student -> !student.isDeleted())
-        .collect(Collectors.toList());
 
-    model.addAttribute("studentList",
-        converter.convertStudentDetails(activeStudents, studentsCourses));
-    System.out.println(activeStudents);
+    model.addAttribute("studentList", converter.convertStudentDetails(students, studentsCourses));
+    System.out.println(students);
     return "studentList";
 
   }

@@ -27,18 +27,6 @@ public interface StudentRepository {
   @Select("SELECT * FROM students_courses WHERE student_id = #{studentId}")
   List<StudentCourse> searchStudentsCourses(String studentId);
 
-  @Select("SELECT * FROM students WHERE id = #{id}")
-  Student findById(@Param("id") String id);
-
-  @Select("SELECT * FROM students_courses WHERE id = #{id}")
-  StudentCourse findStudentCourseById(@Param("id") String id);
-
-  @Select("SELECT * FROM students WHERE isDeleted = #{id}")
-  List<Student> findByIsDeleted();
-
-  @Select("SELECT * FROM students WHERE remark IS NOT NULL")
-  List<Student> findStudentWithRemark();
-
   @Insert("INSERT INTO students (name,kana_name,nickname,email,area,age,sex,remark,isDeleted) VALUES (#{name},#{kanaName},#{nickname},#{email},#{area},#{age},#{sex},#{remark},false)")
   @Options(useGeneratedKeys = true, keyProperty = "id")
   void registerStudent(Student student);
