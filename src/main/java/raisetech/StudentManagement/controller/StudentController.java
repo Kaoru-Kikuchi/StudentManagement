@@ -1,18 +1,23 @@
 package raisetech.StudentManagement.controller;
 
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import raisetech.StudentManagement.controller.exceptionHandler.StudentNotFoundException;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.exception.TestException;
 import raisetech.StudentManagement.service.StudentService;
 
 /**
@@ -42,8 +47,9 @@ public class StudentController {
    * @return 受講生詳細一覧（全件）
    */
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.searchStudentList();
+  public List<StudentDetail> getStudentList() throws TestException {
+    throw new TestException(
+        "現在のこのAPIは利用できません。URＬは『studentList』ではなく『students』を利用してください");
   }
 
   /**
@@ -53,7 +59,8 @@ public class StudentController {
    * @return 受講生
    */
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable @Size(min = 1, max = 3) String id) {
+  public StudentDetail getStudent(
+      @PathVariable @NotBlank @Pattern(regexp = "^\\d+$") String id) {
     return service.searchStudent(id);
   }
 
@@ -64,7 +71,8 @@ public class StudentController {
    * @return 実行結果
    */
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail) {
+  public ResponseEntity<StudentDetail> registerStudent(
+      @RequestBody @Valid StudentDetail studentDetail) {
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
@@ -76,9 +84,26 @@ public class StudentController {
    * @return 実行結果
    */
   @PutMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail) {
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail) {
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理が成功しました");
+  }
+
+  @ExceptionHandler(TestException.class)
+
+  public ResponseEntity<String> handleTestException(TestException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+  }
+
+  /**
+   * 第23回演習課題用の例外実行用メソッド
+   *
+   * @return 生徒情報：その生徒は存在しません
+   * @throws StudentNotFoundException
+   */
+  @GetMapping("/student")
+  public List<StudentDetail> getStudent() throws StudentNotFoundException {
+    throw new StudentNotFoundException("その生徒は存在しません");
   }
 }
 
