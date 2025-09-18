@@ -89,7 +89,8 @@ public class StudentService {
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
     repository.updateStudent(studentDetail.getStudent());
-    studentDetail.getStudentCourseList()
-        .forEach(studentCourse -> repository.updateStudentCourse(studentCourse));
+    for (StudentCourse studentCourse : studentDetail.getStudentCourseList()) {
+      repository.updateStudentCourse(studentCourse);
+    }
   }
 }
