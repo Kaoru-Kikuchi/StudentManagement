@@ -1,6 +1,7 @@
 package raisetech.StudentManagement.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 public class StudentCourse {
 
   @Schema(description = "コースID", example = "101")
+  @Pattern(regexp = "^[0-9]+$", message = "数字のみ入力するようにしてください。")
   private String id;
 
   @Schema(description = "受講生ID", example = "1")

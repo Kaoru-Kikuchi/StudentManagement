@@ -56,9 +56,8 @@ public class StudentController {
       @ApiResponse(responseCode = "400", description = "現在利用できません")
   })
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() throws TestException {
-    throw new TestException(
-        "現在のこのAPIは利用できません。URＬは『studentList』ではなく『students』を利用してください");
+  public List<StudentDetail> getStudentList() {
+    return service.searchStudentList();
   }
 
   /**
