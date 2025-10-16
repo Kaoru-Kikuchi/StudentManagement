@@ -123,17 +123,25 @@ public class StudentController {
   /**
    * 第23回演習課題用の例外実行用メソッド
    *
-   * @return 生徒情報：その生徒は存在しません
+   * @return 生徒情報：このAPIは現在利用できません。古いURLとなっています。
    * @throws StudentNotFoundException
    */
   @Operation(summary = "例外確認用", description = "存在しない生徒情報を取得し例外を確認します")
   @ApiResponses({
-      @ApiResponse(responseCode = "404", description = "その生徒は存在しません")
+      @ApiResponse(responseCode = "404", description = "このAPIは現在利用できません。古いURLとなっています。")
   })
   @GetMapping("/student")
   public List<StudentDetail> getStudent() throws StudentNotFoundException {
-    throw new StudentNotFoundException("その生徒は存在しません");
+    throw new StudentNotFoundException("このAPIは現在利用できません。古いURLとなっています。");
   }
+
+  @ExceptionHandler(StudentNotFoundException.class)
+  public ResponseEntity<String> handleStudentNotFound(StudentNotFoundException ex) {
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST) // 400 を返す
+        .body(ex.getMessage());          // メッセージ本文も返す
+  }
+
 }
 
 
