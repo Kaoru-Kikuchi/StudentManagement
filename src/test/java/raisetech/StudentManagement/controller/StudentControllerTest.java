@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,9 +64,10 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
+    Mockito.when(service.searchStudentList()).thenReturn((List.of(new StudentDetail())));
     mockMvc.perform(get("/studentList"))
         .andExpect(status().isOk())
-        .andExpect(content().json("[]"));
+        .andExpect(content().json("[{\"student\":null,\"studentCourseList\":null}]"));
 
     verify(service, times(1)).searchStudentList();
   }
