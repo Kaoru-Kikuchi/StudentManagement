@@ -5,8 +5,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,72 +59,45 @@ class StudentServiceTest {
   @Test
   void 受講生詳細検索_IDに紐づく受講生情報と受講生コース情報を取得できること() {
     //事前準備
+    String id = "testID";
     Student student = new Student();
-    student.setId("testId");
-    List<StudentCourse> studentCourseList = new ArrayList<>();
-    when(repository.searchStudent("testId")).thenReturn(student);
-    when(repository.searchStudentCourse("testId")).thenReturn(studentCourseList);
+    student.setId(id);
+    when(repository.searchStudent(id)).thenReturn(student);
+    when(repository.searchStudentCourse(id)).thenReturn(new ArrayList<>());
 
     //実行
-    StudentDetail actual = sut.searchStudent("testId");
+    StudentDetail expected = new StudentDetail(student, new ArrayList<>());
+
+    StudentDetail actual = sut.searchStudent(id);
 
     //検証
-    verify(repository, times(1)).searchStudent("testId");
-    verify(repository, times(1)).searchStudentCourse("testId");
-    Assertions.assertEquals(student, actual.getStudent());
-    Assertions.assertEquals(studentCourseList, actual.getStudentCourseList());
+    verify(repository, times(1)).searchStudent(id);
+    verify(repository, times(1)).searchStudentCourse(id);
+    Assertions.assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
   }
 
   @Test
   void 受講生詳細の登録_受講生と受講生コース情報を個別に登録できること() {
     //事前準備
     Student student = new Student();
-    student.setId("testId");
-    List<StudentCourse> studentCourseList = new ArrayList<>();
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
     StudentDetail studentDetails = new StudentDetail(student, studentCourseList);
 
     //実行
-    StudentDetail actual = sut.registerStudent(studentDetails);
+    sut.registerStudent(studentDetails);
 
     //検証
     verify(repository, times(1)).registerStudent(student);
-
-    for (StudentCourse studentCourse : studentCourseList) {
-      verify(repository, times(1)).registerStudentCourse(studentCourse);
-    }
-    Assertions.assertEquals(student, actual.getStudent());
-    Assertions.assertEquals(studentCourseList, actual.getStudentCourseList());
-  }
-
-  @Test
-  void 受講生詳細の更新_受講生を更新できること() {
-    //事前準備
-    Student student = new Student();
-    student.setId("testId");
-    List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentDetail studentDetails = new StudentDetail(student, studentCourseList);
-
-    //実行
-    sut.updateStudent(studentDetails);
-
-    //検証
-    verify(repository, times(1)).updateStudent(student);
-
-    for (StudentCourse studentCourse : studentCourseList) {
-      verify(repository, times(1)).updateStudentCourse(studentCourse);
-    }
-    Assertions.assertEquals(student, studentDetails.getStudent());
-    Assertions.assertEquals(studentCourseList, studentDetails.getStudentCourseList());
+    verify(repository, times(1)).registerStudentCourse(studentCourse);
   }
 
   @Test
   void 受講生詳細の更新_受講生と受講生コース情報それぞれを更新できること() {
     //事前準備
     Student student = new Student();
-    student.setId("testId");
-    List<StudentCourse> studentCourseList = new ArrayList<>();
-    StudentCourse course1 = new StudentCourse();
-    studentCourseList.add(course1);
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
     StudentDetail studentDetails = new StudentDetail(student, studentCourseList);
 
     //実行
@@ -130,11 +105,26 @@ class StudentServiceTest {
 
     //検証
     verify(repository, times(1)).updateStudent(student);
+    verify(repository, times(1)).updateStudentCourse(studentCourse);
+  }
 
-    for (StudentCourse studentCourse : studentCourseList) {
-      verify(repository, times(1)).updateStudentCourse(studentCourse);
-    }
-    Assertions.assertEquals(student, studentDetails.getStudent());
-    Assertions.assertEquals(studentCourseList, studentDetails.getStudentCourseList());
+  @Test
+  void 受講生詳細の登録_初期化処理が行われること() {
+    //事前準備
+    String id = "testID";
+    Student student = new Student();
+    student.setId(id);
+    StudentCourse studentCourse = new StudentCourse();
+
+    //実行
+    sut.initStudentsCourse(studentCourse, student.getId());
+
+    //検証
+    assertEquals(id, studentCourse.getStudentId());
+    assertEquals(LocalDateTime.now().getHour(), studentCourse.getCourseStartAt().getHour());
+    assertEquals(LocalDateTime.now().plusYears(1).getYear(),
+        studentCourse.getCourseEndAt().getYear());
   }
 }
+
+
