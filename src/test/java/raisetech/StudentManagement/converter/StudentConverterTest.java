@@ -1,7 +1,9 @@
 package raisetech.StudentManagement.converter;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,37 +14,66 @@ import raisetech.StudentManagement.domain.StudentDetail;
 
 class StudentConverterTest {
 
-  private StudentConverter converter;
+  private StudentConverter sut;
 
   @BeforeEach
   void setUp() {
-    converter = new StudentConverter();
+    sut = new StudentConverter();
   }
 
   @Test
-  void 受講生とコースが正しく紐づく() {
-    //準備
+  void 受講生のリストと受講生コース情報のリストを渡して受講生詳細のリストが作成できること() {
+    Student student = createStudent();
+
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId("1");
+    studentCourse.setStudentId("1");
+    studentCourse.setCourseName("Javaコース");
+    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+
+    List<Student> studentList = List.of(student);
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
+
+    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
+
+    assertThat(actual.get(0).getStudent()).isEqualTo(student);
+    assertThat(actual.get(0).getStudentCourseList()).isEqualTo(studentCourseList);
+  }
+
+  @Test
+  void 受講生のリストと受講生コース情報のリストを渡した時に紐づかない受講生コース情報は除外されること() {
+    Student student = createStudent();
+
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId("1");
+    studentCourse.setStudentId("2");
+    studentCourse.setCourseName("Javaコース");
+    studentCourse.setCourseStartAt(LocalDateTime.now());
+    studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
+
+    List<Student> studentList = List.of(student);
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
+
+    List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
+
+    assertThat(actual.get(0).getStudent()).isEqualTo(student);
+    assertThat(actual.get(0).getStudentCourseList()).isEmpty();
+  }
+
+
+  private static Student createStudent() {
     Student student = new Student();
     student.setId("1");
-    student.setName("Taro");
-
-    StudentCourse course1 = new StudentCourse();
-    course1.setStudentId("1");
-    course1.setCourseName("Javaコース");
-
-    StudentCourse course2 = new StudentCourse();
-    course2.setStudentId("1");
-    course2.setCourseName("Spring Boot入門");
-
-    List<Student> students = List.of(student);
-    List<StudentCourse> courses = List.of(course1, course2);
-
-    //実行
-    List<StudentDetail> result = converter.convertStudentDetails(students, courses);
-
-    // 検証
-    assertEquals(1, result.size(), "受講生は一人のはず");
-    assertEquals(2, result.get(0).getStudentCourseList().size(), "コースが2つ紐づくはず");
-    assertEquals("Taro", result.get(0).getStudent().getName());
+    student.setName("江並公史");
+    student.setKanaName("エナミコウジ");
+    student.setNickname("エナミ");
+    student.setEmail("test@example.com");
+    student.setArea("奈良県");
+    student.setAge(36);
+    student.setSex("男性");
+    student.setRemark("");
+    student.setDeleted(false);
+    return student;
   }
 }
