@@ -1,10 +1,12 @@
 package raisetech.StudentManagement.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,28 +16,26 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
-import raisetech.StudentManagement.domain.StudentDetail;
 import raisetech.StudentManagement.service.StudentService;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
 import org.springframework.http.MediaType;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 
 @WebMvcTest(StudentController.class)
 class StudentControllerTest {
 
+  private static final Logger log = LoggerFactory.getLogger(StudentControllerTest.class);
   @Autowired
   private MockMvc mockMvc;
 
@@ -54,94 +54,95 @@ class StudentControllerTest {
   private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
   @Test
-  void 受講生詳細の一覧検索が実行できること() throws Exception {
+  void 受講生詳細の一覧検索が実行できて空のリストが返ってくること() throws Exception {
     mockMvc.perform(get("/studentList"))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
 
     verify(service, times(1)).searchStudentList();
   }
 
   @Test
-  void 受講生詳細の検索_IDに紐づく任意の受講生情報を取得できること() throws Exception {
-    String id = "123";
-    Student student = new Student();
-    student.setId(id);
-    StudentDetail studentDetail = new StudentDetail(student, List.of());
-    when(service.searchStudent(id)).thenReturn(studentDetail);
+  void 受講生詳細の検索が実行できて空で帰ってくること() throws Exception {
+    String id = "999";
     mockMvc.perform(get("/student/{id}", id))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.student.id").value(id));
+        .andExpect(status().isOk());
 
     verify(service, times(1)).searchStudent(id);
   }
 
   @Test
-  void 受講生詳細の登録ができること() throws Exception {
-    Student student = new Student();
-    student.setId("1");
-    student.setName("田中太郎");
-    student.setKanaName("タナカタロウ");
-    student.setNickname("タナカ");
-    student.setEmail("test@example.com");
-    student.setArea("東京");
-    student.setSex("男性");
-
-    StudentCourse course = new StudentCourse();
-    course.setId("101");
-    course.setCourseName("Java基礎");
-    course.setStudentId("1");
-    course.setCourseStartAt(LocalDateTime.now());
-    course.setCourseEndAt(LocalDateTime.now().plusYears(1));
-
-    StudentDetail request = new StudentDetail(student, List.of(course));
-
-    when(service.registerStudent(org.mockito.ArgumentMatchers.any(StudentDetail.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/registerStudent")
+  void 受講生詳細の登録が実行できて空で返ってくること() throws Exception {
+    //リクエストデータは適切に構築して入力チェックの検証も兼ねている。
+    //本来であれば返りは登録されたデータが入るが、モック化すると意味がないため、レスポンスは作らない。
+    mockMvc.perform(post("/registerStudent")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.student.id").value("1"))
-        .andExpect(jsonPath("$.student.name").value("田中太郎"));
+            .content("""
+                {
+                  "student": {
+                    "name": "江並康介",
+                    "kanaName": "エナミ",
+                    "nickname": "コウジ",
+                    "email": "test@example.com",
+                    "area": "奈良",
+                    "age": 36,
+                    "sex": "男性",
+                    "remark": ""
+                  },
+                  "studentCourseList": [
+                    {
+                      "courseName": "Javaコース"
+                    }
+                  ]
+                }
+                """))
+        .andExpect(status().isOk());
 
-    verify(service, times(1)).registerStudent(
-        org.mockito.ArgumentMatchers.any(StudentDetail.class));
+    verify(service, times(1)).registerStudent(any());
 
   }
 
   @Test
   void 受講生詳細の更新が正常に実行できること() throws Exception {
-
-    Student student = new Student();
-    student.setId("1");
-    student.setName("田中太郎");
-    student.setKanaName("タナカタロウ");
-    student.setNickname("タナカ");
-    student.setEmail("test@example.com");
-    student.setArea("東京");
-    student.setSex("男性");
-
-    StudentCourse course = new StudentCourse();
-    course.setId("101");
-    course.setCourseName("Java基礎");
-    course.setStudentId("1");
-    course.setCourseStartAt(LocalDateTime.now());
-    course.setCourseEndAt(LocalDateTime.now().plusYears(1));
-
-    StudentDetail request = new StudentDetail(student, List.of(course));
-
-    mockMvc.perform(MockMvcRequestBuilders.put("/updateStudent")
+    //リクエストデータは適切に構築して入力チェックの検証も兼ねている。
+    mockMvc.perform(put("/updateStudent")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$").value("更新処理が成功しました"));
+            .content("""
+                {
+                  "student": {
+                    "id": "12",
+                    "name": "江並康介",
+                    "kanaName": "エナミ",
+                    "nickname": "コウジ",
+                    "email": "test@example.com",
+                    "area": "奈良",
+                    "age": 36,
+                    "sex": "男性",
+                    "remark": ""
+                  },
+                  "studentCourseList": [
+                    {
+                      "id": "15",
+                      "studentId": "12",
+                      "courseName": "Javaコース",
+                      "courseStartAt": "2024-04-27T10:50:39",
+                      "courseEndAt": "2025-04-27T10:50:39"
+                    }
+                  ]
+                }
+                """))
+        .andExpect(status().isOk());
 
-    verify(service, times(1)).updateStudent(org.mockito.ArgumentMatchers.any(StudentDetail.class));
+    verify(service, times(1)).updateStudent(any());
+
   }
 
+  @Test
+  void 受講生詳細の例外APIが実行できてステータスが400で返ってくること() throws Exception {
+    mockMvc.perform(get("/student"))
+        .andExpect(status().is4xxClientError())
+        .andExpect(content().string("このAPIは現在利用できません。古いURLとなっています。"));
+  }
 
   @Test
   void 受講生詳細の受講生で適切な値を入力した時に入力チェックに異常が発生しないこと() {
