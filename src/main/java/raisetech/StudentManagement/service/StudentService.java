@@ -6,91 +6,109 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
+import raisetech.StudentManagement.data.CourseRegistrationStatus;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 import raisetech.StudentManagement.domain.StudentDetail;
+import raisetech.StudentManagement.repository.CourseRegistrationStatusRepository;
 import raisetech.StudentManagement.repository.StudentRepository;
 
-/**
- * 受講生情報を取り扱うサービスです。 受講生の検索や登録・更新処理を行います。
- */
 @Service
 public class StudentService {
 
-  private StudentRepository repository;
-  private StudentConverter converter;
+  private final StudentRepository repository;
+  private final StudentConverter converter;
+  // 変更点①：CourseRegistrationStatusRepository を追加
+  private final CourseRegistrationStatusRepository statusRepository;
 
+  // 変更点②：コンストラクタに追加
   @Autowired
-  public StudentService(StudentRepository repository, StudentConverter converter) {
+  public StudentService(StudentRepository repository,
+      StudentConverter converter,
+      CourseRegistrationStatusRepository statusRepository) {
     this.repository = repository;
     this.converter = converter;
+    this.statusRepository = statusRepository;
   }
 
-  /**
-   * 　受講生詳細一覧検索です。 　全件検索を行うので、条件指定は行わないものになります。
-   *
-   * @return 受講生詳細一覧（全件）
-   */
+  // 変更点③：searchStudentListで各コースにステータスをセット
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
     List<StudentCourse> studentCourseList = repository.searchStudentCourseList();
-    return converter.convertStudentDetails(studentList, studentCourseList);
+    List<StudentDetail> details = converter.convertStudentDetails(studentList, studentCourseList);
+
+    // 各コースに登録ステータスをセット
+    details.forEach(detail -> {
+      detail.getStudentCourseList().forEach(course -> {
+        List<CourseRegistrationStatus> statusList = statusRepository.findByStudentCourseId(
+            course.getId());
+        if (!statusList.isEmpty()) {
+          course.setRegistrationStatus(statusList.get(0).getRegistrationStatus());
+        }
+      });
+    });
+    return details;
   }
 
-  /**
-   * 受講生詳細検索です。 IDに紐づく受講生情報を取得したあと、その受講生に紐づく受講生コース情報を取得して設定します。
-   *
-   * @param id 　受講生ID
-   * @return 受講生詳細
-   */
-  public StudentDetail searchStudent(String id) {
+  // 変更点④：searchStudentでもステータスをセット
+  public StudentDetail searchStudent(int id) {
     Student student = repository.searchStudent(id);
     List<StudentCourse> studentCourse = repository.searchStudentCourse(student.getId());
+
+    // ステータス追加
+    studentCourse.forEach(course -> {
+      List<CourseRegistrationStatus> statusList = statusRepository.findByStudentCourseId(
+          course.getId());
+      if (!statusList.isEmpty()) {
+        course.setRegistrationStatus(statusList.get(0).getRegistrationStatus());
+      }
+    });
     return new StudentDetail(student, studentCourse);
   }
 
-  /**
-   * 受講生詳細の登録を行います。 受講生と受講生コース情報を個別に登録し、受講生コース情報には受講生を紐づける値とコース開始日、コース終了日を設定します。
-   *
-   * @param studentDetail 　受講生詳細
-   * @return 登録情報を付与した受講生詳細
-   */
   @Transactional
   public StudentDetail registerStudent(StudentDetail studentDetail) {
     Student student = studentDetail.getStudent();
-
     repository.registerStudent(student);
+
     studentDetail.getStudentCourseList().forEach(studentCourse -> {
       initStudentsCourse(studentCourse, student.getId());
       repository.registerStudentCourse(studentCourse);
+
+      // 変更点⑤：新規登録時、ステータスを仮申込に初期化
+      CourseRegistrationStatus status = new CourseRegistrationStatus();
+      status.setStudentCourseId(studentCourse.getId());
+      status.setRegistrationStatus("仮申込");
+      // ステータス登録用メソッドを追加して repository に保存
+      // （別に insertCourseRegistrationStatus メソッドを作る必要があります）
+      statusRepository.insert(status);
     });
     return studentDetail;
   }
 
-  /**
-   * 　受講生コース情報を登録する際の初期情報を設定する。
-   *
-   * @param studentCourse 　受講生コース情報
-   * @param id            　受講生id
-   */
-  void initStudentsCourse(StudentCourse studentCourse, String id) {
+  void initStudentsCourse(StudentCourse studentCourse, int id) {
     LocalDateTime now = LocalDateTime.now();
-
     studentCourse.setStudentId(id);
     studentCourse.setCourseStartAt(now);
     studentCourse.setCourseEndAt(now.plusYears(1));
   }
 
-  /**
-   * 受講生詳細の更新を行います。受講生と受講生コース情報をそれぞれ更新します。
-   *
-   * @param studentDetail 　受講生詳細
-   */
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
     repository.updateStudent(studentDetail.getStudent());
     for (StudentCourse studentCourse : studentDetail.getStudentCourseList()) {
       repository.updateStudentCourse(studentCourse);
+
+      // 変更点⑥：ステータス更新（必要に応じて）
+      if (studentCourse.getRegistrationStatus() != null) {
+        List<CourseRegistrationStatus> statusList = statusRepository.findByStudentCourseId(
+            studentCourse.getId());
+        if (!statusList.isEmpty()) {
+          CourseRegistrationStatus status = statusList.get(0);
+          status.setRegistrationStatus(studentCourse.getRegistrationStatus());
+          statusRepository.update(status);
+        }
+      }
     }
   }
 }

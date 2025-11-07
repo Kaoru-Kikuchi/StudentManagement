@@ -35,7 +35,6 @@ dependencies {
 	//openAPI Generator
 	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0"
 
-
 	//便利機能、ユーティリティー
 	implementation 'org.apache.commons:commons-lang3:3.17.0'
 
@@ -46,7 +45,7 @@ dependencies {
 	//MySQlドライバ
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
-    //MyBatis
+	//MyBatis
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.4'
 	//APサーバー（Tomcat)
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
@@ -61,4 +60,9 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// ★追加部分：非推奨API警告を有効化
+tasks.withType(JavaCompile) {
+	options.compilerArgs << "-Xlint:deprecation"
 }

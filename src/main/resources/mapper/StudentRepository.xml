@@ -4,41 +4,36 @@
 
 <mapper namespace="raisetech.StudentManagement.repository.StudentRepository">
 
-  <!-- 受講生の全件検索 -->
   <select id="search" resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students
   </select>
 
-  <!-- 受講生の検索 -->
-  <select id="searchStudent" resultType="raisetech.StudentManagement.data.Student">
+  <select id="searchStudent" parameterType="int"
+    resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students WHERE id = #{id}
   </select>
 
-  <!-- 受講生コース情報の全件検索 -->
   <select id="searchStudentCourseList" resultType="raisetech.StudentManagement.data.StudentCourse">
     SELECT * FROM students_courses
   </select>
 
-  <!-- 受講生コース情報の検索 -->
-  <select id="searchStudentCourse" resultType="raisetech.StudentManagement.data.StudentCourse">
+  <select id="searchStudentCourse" parameterType="int"
+    resultType="raisetech.StudentManagement.data.StudentCourse">
     SELECT * FROM students_courses WHERE student_id = #{studentId}
   </select>
 
-  <!-- 受講生の新規登録 -->
   <insert id="registerStudent" parameterType="raisetech.StudentManagement.data.Student"
     useGeneratedKeys="true" keyProperty="id">
     INSERT INTO students (name, kana_name, nickname, email, area, age, sex, remark, isDeleted)
     VALUES (#{name}, #{kanaName}, #{nickname}, #{email}, #{area}, #{age}, #{sex}, #{remark}, false)
   </insert>
 
-  <!-- 受講生コース情報の新規登録 -->
   <insert id="registerStudentCourse" parameterType="raisetech.StudentManagement.data.StudentCourse"
     useGeneratedKeys="true" keyProperty="id">
     INSERT INTO students_courses (student_id, course_name, course_start_at, course_end_at)
-    VALUES (#{studentId},#{courseName},#{courseStartAt},#{courseEndAt})
+    VALUES (#{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt})
   </insert>
 
-  <!-- 学生情報を更新する -->
   <update id="updateStudent" parameterType="raisetech.StudentManagement.data.Student">
     UPDATE students
     SET
@@ -54,11 +49,9 @@
     WHERE id = #{id}
   </update>
 
-  <!-- 学生コース情報のコース名を更新する -->
   <update id="updateStudentCourse" parameterType="raisetech.StudentManagement.data.StudentCourse">
     UPDATE students_courses
-    SET
-    course_name = #{courseName}
+    SET course_name = #{courseName}
     WHERE id = #{id}
   </update>
 

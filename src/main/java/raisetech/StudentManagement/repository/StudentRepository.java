@@ -1,11 +1,7 @@
 package raisetech.StudentManagement.repository;
 
 import java.util.List;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
 
@@ -25,10 +21,10 @@ public interface StudentRepository {
   /**
    * 受講生の検索を行います。
    *
-   * @param id 　受講生ID
+   * @param id 受講生ID
    * @return 受講生
    */
-  Student searchStudent(String id);
+  Student searchStudent(int id);
 
   /**
    * 受講生コース情報の全件検索を行います。
@@ -40,37 +36,36 @@ public interface StudentRepository {
   /**
    * 受講生IDに紐づく受講生コース情報を検索します。
    *
-   * @param studentId 　受講生ID
+   * @param studentId 受講生ID
    * @return 受講生IDに紐づく受講生コース情報
    */
-  List<StudentCourse> searchStudentCourse(String studentId);
+  List<StudentCourse> searchStudentCourse(int studentId);
 
   /**
    * 受講生を新規登録します。IDに関しては自動採番を行う。
    *
-   * @param student 　受講生
+   * @param student 受講生
    */
   void registerStudent(Student student);
 
   /**
    * 受講生コース情報を新規登録します。IDに関しては自動採番を行う。
    *
-   * @param studentCourse 　受講生コース情報
+   * @param studentCourse 受講生コース情報
    */
   void registerStudentCourse(StudentCourse studentCourse);
 
   /**
    * 受講生を更新します。
    *
-   * @param student 　受講生
+   * @param student 受講生
    */
   void updateStudent(Student student);
 
   /**
    * 受講生コース情報のコース名を更新します。
    *
-   * @param studentCourse 　受講生コース情報
+   * @param studentCourse 受講生コース情報
    */
   void updateStudentCourse(StudentCourse studentCourse);
-
 }
