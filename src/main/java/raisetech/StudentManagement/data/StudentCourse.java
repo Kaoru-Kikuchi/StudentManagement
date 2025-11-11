@@ -1,7 +1,6 @@
 package raisetech.StudentManagement.data;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +11,10 @@ import lombok.Setter;
 public class StudentCourse {
 
   @Schema(description = "コースID", example = "101")
-  @Pattern(regexp = "^[0-9]+$", message = "数字のみ入力するようにしてください。")
-  private String id;
+  private int id;
 
   @Schema(description = "受講生ID", example = "1")
-  private String studentId;
+  private int studentId;
 
   @Schema(description = "コース名", example = "Java基礎")
   private String courseName;
@@ -26,4 +24,7 @@ public class StudentCourse {
 
   @Schema(description = "コース終了日", example = "2025-09-30T18:00:00")
   private LocalDateTime courseEndAt;
+
+  @Schema(description = "コース申込状況", example = "仮申込")
+  private String registrationStatus; // 追加
 }

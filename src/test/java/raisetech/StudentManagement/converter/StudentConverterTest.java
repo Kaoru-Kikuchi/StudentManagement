@@ -1,12 +1,11 @@
 package raisetech.StudentManagement.converter;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import raisetech.StudentManagement.controller.converter.StudentConverter;
 import raisetech.StudentManagement.data.Student;
 import raisetech.StudentManagement.data.StudentCourse;
@@ -26,8 +25,8 @@ class StudentConverterTest {
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setId("1");
-    studentCourse.setStudentId("1");
+    studentCourse.setId(1); // int に変更
+    studentCourse.setStudentId(1); // int に変更
     studentCourse.setCourseName("Javaコース");
     studentCourse.setCourseStartAt(LocalDateTime.now());
     studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
@@ -46,8 +45,8 @@ class StudentConverterTest {
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
-    studentCourse.setId("1");
-    studentCourse.setStudentId("2");
+    studentCourse.setId(1); // int に変更
+    studentCourse.setStudentId(2); // int に変更（紐づかない設定）
     studentCourse.setCourseName("Javaコース");
     studentCourse.setCourseStartAt(LocalDateTime.now());
     studentCourse.setCourseEndAt(LocalDateTime.now().plusYears(1));
@@ -61,10 +60,9 @@ class StudentConverterTest {
     assertThat(actual.get(0).getStudentCourseList()).isEmpty();
   }
 
-
   private static Student createStudent() {
     Student student = new Student();
-    student.setId("1");
+    student.setId(1); // int に変更
     student.setName("江並公史");
     student.setKanaName("エナミコウジ");
     student.setNickname("エナミ");
