@@ -17,3 +17,15 @@ INSERT INTO students_courses (student_id, course_name, course_start_at, course_e
 (2, 'AWSコース', '2023-08-01 08:00:00', '2023-11-01 17:00:00'),
 (3, 'Javaコース', '2024-01-01 13:00:00', '2024-05-01 19:00:00'),
 (5, 'Web開発コース', '2024-01-01 13:00:00', '2024-05-01 19:00:00');
+
+INSERT INTO course_registration_status (student_course_id, registration_status) VALUES
+(1, '仮申込'),
+(2, '本申込'),
+(3, '受講中'),
+(4, '受講終了'),
+(5, '仮申込'),
+(6, '本申込'),
+(7, '受講中'),
+(8, '受講終了'),
+(9, '仮申込'),
+(10, '本申込');
