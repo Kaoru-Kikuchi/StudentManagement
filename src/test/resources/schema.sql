@@ -1,3 +1,4 @@
+-- studentsテーブル
 CREATE TABLE IF NOT EXISTS students (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
@@ -8,9 +9,10 @@ CREATE TABLE IF NOT EXISTS students (
     age INT,
     sex VARCHAR(10),
     remark TEXT,
-    isDeleted boolean
+    isDeleted BOOLEAN
 );
 
+-- students_coursesテーブル
 CREATE TABLE IF NOT EXISTS students_courses (
     id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT NOT NULL,
@@ -19,14 +21,11 @@ CREATE TABLE IF NOT EXISTS students_courses (
     course_end_at TIMESTAMP
 );
 
+-- course_registration_statusテーブル（ENUM削除、VARCHARへ変更）
 CREATE TABLE IF NOT EXISTS course_registration_status (
-    id INT NOT NULL AUTO_INCREMENT COMMENT '申込状況ID',
-    student_course_id INT NOT NULL COMMENT '受講生コースID（外部キー）',
-    registration_status ENUM('仮申込','本申込','受講中','受講終了') NOT NULL COMMENT '申込ステータス',
-    PRIMARY KEY (id),
-    KEY fk_student_course_status (student_course_id),
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_course_id INT NOT NULL,
+    registration_status VARCHAR(20) NOT NULL,
     CONSTRAINT fk_student_course_status FOREIGN KEY (student_course_id)
         REFERENCES students_courses(id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='コース申込状況テーブル';
+);
