@@ -4,36 +4,43 @@
 
 <mapper namespace="raisetech.StudentManagement.repository.StudentRepository">
 
+  <!-- 受講生全件検索 -->
   <select id="search" resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students
   </select>
 
+  <!-- IDで1件検索 -->
   <select id="searchStudent" parameterType="int"
     resultType="raisetech.StudentManagement.data.Student">
     SELECT * FROM students WHERE id = #{id}
   </select>
 
+  <!-- コース全件検索 -->
   <select id="searchStudentCourseList" resultType="raisetech.StudentManagement.data.StudentCourse">
     SELECT * FROM students_courses
   </select>
 
+  <!-- student_idでコース検索 -->
   <select id="searchStudentCourse" parameterType="int"
     resultType="raisetech.StudentManagement.data.StudentCourse">
     SELECT * FROM students_courses WHERE student_id = #{studentId}
   </select>
 
+  <!-- 受講生登録（is_deletedに統一） -->
   <insert id="registerStudent" parameterType="raisetech.StudentManagement.data.Student"
     useGeneratedKeys="true" keyProperty="id">
-    INSERT INTO students (name, kana_name, nickname, email, area, age, sex, remark, isDeleted)
+    INSERT INTO students (name, kana_name, nickname, email, area, age, sex, remark, is_deleted)
     VALUES (#{name}, #{kanaName}, #{nickname}, #{email}, #{area}, #{age}, #{sex}, #{remark}, false)
   </insert>
 
+  <!-- 受講生コース登録 -->
   <insert id="registerStudentCourse" parameterType="raisetech.StudentManagement.data.StudentCourse"
     useGeneratedKeys="true" keyProperty="id">
     INSERT INTO students_courses (student_id, course_name, course_start_at, course_end_at)
     VALUES (#{studentId}, #{courseName}, #{courseStartAt}, #{courseEndAt})
   </insert>
 
+  <!-- 受講生更新（is_deleted に修正） -->
   <update id="updateStudent" parameterType="raisetech.StudentManagement.data.Student">
     UPDATE students
     SET
@@ -45,10 +52,11 @@
     age = #{age},
     sex = #{sex},
     remark = #{remark},
-    isDeleted = #{isDeleted}
+    is_deleted = #{isDeleted}
     WHERE id = #{id}
   </update>
 
+  <!-- コース更新 -->
   <update id="updateStudentCourse" parameterType="raisetech.StudentManagement.data.StudentCourse">
     UPDATE students_courses
     SET course_name = #{courseName}
