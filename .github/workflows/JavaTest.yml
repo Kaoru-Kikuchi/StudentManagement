@@ -27,6 +27,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4.0.0
 
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x gradlew
+
       - name: Test with Gradle Wrapper
         run: ./gradlew test
 
@@ -35,7 +38,7 @@ jobs:
 
       - name: SCP Copy Application to EC2
         env:
-          PRIVATE_KEY: ${{ secrets.AWS_EC2_PRIVATE_KEY }}
+          PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key $SRC_PATH $EC2_USER@$EC2_HOST:$DEST_PATH
@@ -52,27 +55,27 @@ jobs:
             if [ -f /etc/systemd/system/StudentManagement.service ]; then
               echo "already exists Service File"
             else
-              cat <<EOL | sudo tee -a /etc/systemd/system/StudentManagement.service
+              cat <<EOL | sudo tee /etc/systemd/system/StudentManagement.service
               [Unit]
-              Description = StudentManagement app
-  
+              Description=StudentManagement app
+              
               [Service]
-              ExecStart = java -jar ${DEST_PATH}
-              EnvironmentFile = /etc/sysconfig/StudentManagement
-              Restart = no
-              Type = simple
-              User = ec2-user
-              Group = ec2-user
-              SuccessExitStatus = 143
+              ExecStart=java -jar ${DEST_PATH}
+              EnvironmentFile=/etc/sysconfig/StudentManagement
+              Restart=no
+              Type=simple
+              User=ec2-user
+              Group=ec2-user
+              SuccessExitStatus=143
               
               [Install]
-              WantedBy = multi-user.target
+              WantedBy=multi-user.target
               EOL
               fi
               
               sudo systemctl daemon-reload
-              if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)" ; then
-                sudo systemctl restart StudentManagement
-              else
-                sudo systemctl start StudentManagement
-              fi
+            if sudo systemctl status StudentManagement 2>&1 | grep "Active: active (running)" ; then
+              sudo systemctl restart StudentManagement
+            else
+              sudo systemctl start StudentManagement
+            fi
