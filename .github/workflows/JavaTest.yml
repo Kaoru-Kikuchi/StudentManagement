@@ -55,7 +55,7 @@ jobs:
             if [ -f /etc/systemd/system/StudentManagement.service ]; then
               echo "already exists Service File"
             else
-              cat << "EOL" | sudo tee /etc/systemd/system/StudentManagement.service
+              cat <<EOL | sudo tee /etc/systemd/system/StudentManagement.service
               [Unit]
               Description=StudentManagement app
               
@@ -70,7 +70,7 @@ jobs:
               
               [Install]
               WantedBy=multi-user.target
-              EOL
+            EOL
               fi
               
               sudo systemctl daemon-reload
