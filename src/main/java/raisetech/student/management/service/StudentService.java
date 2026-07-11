@@ -26,6 +26,9 @@ public class StudentService {
   }
 
   public List<StudentCourse> searchStudentCourseList() {
-    return repository.searchStudentCourseList();
+    return repository.searchStudentCourseList().stream()
+        .filter(studentCourse -> "Java基礎".equals(studentCourse.getCourseName()))
+        .toList();
+    };
   }
-}
+
