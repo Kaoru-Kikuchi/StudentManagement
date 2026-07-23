@@ -12,6 +12,13 @@
       th:object="${studentDetail}"
       method="post">
 
+  <!-- 表示用ID -->
+  <div>
+    <label>ID：</label>
+    <span th:text="*{student.id}"></span>
+  </div>
+
+  <!-- 更新時に送信するID -->
   <input type="hidden" th:field="*{student.id}">
 
   <div>
@@ -70,6 +77,15 @@
            id="remark"
            th:field="*{student.remark}">
   </div>
+
+  <div>
+    <label for="deleted">キャンセル：</label>
+    <input type="checkbox"
+           id="deleted"
+           th:field="*{student.deleted}">
+  </div>
+
+  <h2>受講コース</h2>
 
   <div th:each="studentCourse, stat : *{studentCourses}">
     <input type="hidden"
