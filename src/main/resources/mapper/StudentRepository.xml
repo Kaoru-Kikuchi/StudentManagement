@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="raisetech.student.management.repository.StudentRepository">
+
+  <!--
+    受講生の全件検索を行います。
+  -->
+  <select id="search"
+    resultType="raisetech.student.management.data.Student">
+    SELECT *
+    FROM students
+  </select>
+
+  <!--
+    受講生IDに紐づく受講生を検索します。
+  -->
+  <select id="searchStudent"
+    parameterType="string"
+    resultType="raisetech.student.management.data.Student">
+    SELECT *
+    FROM students
+    WHERE id = #{id}
+  </select>
+
+  <!--
+    受講生コース情報の全件検索を行います。
+  -->
+  <select id="searchStudentCourseList"
+    resultType="raisetech.student.management.data.StudentCourse">
+    SELECT *
+    FROM students_courses
+  </select>
+
+  <!--
+    受講生IDに紐づく受講生コース情報を検索します。
+  -->
+  <select id="searchStudentCourseListByStudentId"
+    parameterType="string"
+    resultType="raisetech.student.management.data.StudentCourse">
+    SELECT *
+    FROM students_courses
+    WHERE student_id = #{studentId}
+  </select>
+
+  <!--
+    受講生を新規登録します。
+  -->
+  <insert id="registerStudent">
+    INSERT INTO students (
+    id,
+    name,
+    kana_name,
+    nickname,
+    email,
+    area,
+    age,
+    sex,
+    remark,
+    is_deleted
+    )
+    VALUES (
+    #{id},
+    #{name},
+    #{kanaName},
+    #{nickname},
+    #{email},
+    #{area},
+    #{age},
+    #{sex},
+    #{remark},
+    false
+    )
+  </insert>
+
+  <!--
+    受講生コース情報を新規登録します。
+  -->
+  <insert id="registerStudentCourse">
+    INSERT INTO students_courses (
+    id,
+    student_id,
+    course_name,
+    course_start_at,
+    course_end_at
+    )
+    VALUES (
+    #{id},
+    #{studentId},
+    #{courseName},
+    #{courseStartAt},
+    #{courseEndAt}
+    )
+  </insert>
+
+  <!--
+    受講生情報を更新します。
+  -->
+  <update id="updateStudent">
+    UPDATE students
+    SET
+    name = #{name},
+    kana_name = #{kanaName},
+    nickname = #{nickname},
+    email = #{email},
+    area = #{area},
+    age = #{age},
+    sex = #{sex},
+    remark = #{remark},
+    is_deleted = #{isDeleted}
+    WHERE id = #{id}
+  </update>
+
+  <!--
+    受講生コース情報を更新します。
+  -->
+  <update id="updateStudentCourse">
+    UPDATE students_courses
+    SET
+    course_name = #{courseName}
+    WHERE id = #{id}
+  </update>
+
+</mapper>
