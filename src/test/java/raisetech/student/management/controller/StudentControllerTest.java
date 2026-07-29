@@ -1,6 +1,7 @@
 package raisetech.student.management.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,10 @@ import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.service.StudentService;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+
+import org.springframework.http.MediaType;
 
 @WebMvcTest(StudentController.class)
 class StudentControllerTest {
@@ -146,5 +151,89 @@ class StudentControllerTest {
 
     verify(service, times(1))
         .searchStudent(id);
+  }
+
+  @Test
+  void 受講生詳細の登録が実行できて正常終了すること()
+      throws Exception {
+
+    Student student = new Student();
+    student.setName("山田太郎");
+    student.setKanaName("ヤマダタロウ");
+    student.setNickname("タロウ");
+    student.setEmail("yamada@example.com");
+    student.setArea("東京都");
+    student.setAge(20);
+    student.setSex("男性");
+    student.setRemark("");
+
+    StudentDetail detail = new StudentDetail();
+    detail.setStudent(student);
+    detail.setStudentCourseList(new ArrayList<>());
+
+    when(service.registerStudent(any(StudentDetail.class)))
+        .thenReturn(detail);
+
+    mockMvc.perform(post("/registerStudent")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+              {
+                "student": {
+                  "name":"山田太郎",
+                  "kanaName":"ヤマダタロウ",
+                  "nickname":"タロウ",
+                  "email":"yamada@example.com",
+                  "area":"東京都",
+                  "age":20,
+                  "sex":"男性",
+                  "remark":""
+                },
+                "studentCourseList":[]
+              }
+              """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.student.name").value("山田太郎"))
+        .andExpect(jsonPath("$.student.email").value("yamada@example.com"));
+
+    verify(service, times(1))
+        .registerStudent(any(StudentDetail.class));
+  }
+
+  @Test
+  void 受講生詳細の更新が実行できて正常終了すること()
+      throws Exception {
+
+    mockMvc.perform(put("/updateStudent")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+              {
+                "student": {
+                  "id":"ada1f007-7942-11f1-b4d0-b81ea42bf144",
+                  "name":"山田太郎",
+                  "kanaName":"ヤマダタロウ",
+                  "nickname":"タロウ",
+                  "email":"yamada@example.com",
+                  "area":"東京都",
+                  "age":20,
+                  "sex":"男性",
+                  "remark":""
+                },
+                "studentCourseList":[]
+              }
+              """))
+        .andExpect(status().isOk())
+        .andExpect(content().string("更新処理が成功しました"));
+
+    verify(service, times(1))
+        .updateStudent(any(StudentDetail.class));
+  }
+
+  @Test
+  void 例外APIが実行されてステータス400とエラーメッセージが返ること()
+      throws Exception {
+
+    mockMvc.perform(get("/testException"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("失敗しました"));
   }
 }
