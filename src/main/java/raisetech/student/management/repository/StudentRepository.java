@@ -4,6 +4,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.data.StudentCourseStatus;
 
 /**
  * 受講生テーブルと受講生コーステーブルに紐づくRepositoryです。
@@ -68,4 +69,26 @@ public interface StudentRepository {
    * @param studentCourse 受講生コース情報
    */
   void updateStudentCourse(StudentCourse studentCourse);
+
+  /**
+   * 受講生コースIDに紐づく申込状況を検索します。
+   *
+   * @param studentCourseId 受講生コースID
+   * @return 申込状況
+   */
+  StudentCourseStatus searchStudentCourseStatus(String studentCourseId);
+
+  /**
+   * 申込状況を登録します。
+   *
+   * @param studentCourseStatus 申込状況
+   */
+  void registerStudentCourseStatus(StudentCourseStatus studentCourseStatus);
+
+  /**
+   * 申込状況を更新します。
+   *
+   * @param studentCourseStatus 申込状況
+   */
+  void updateStudentCourseStatus(StudentCourseStatus studentCourseStatus);
 }

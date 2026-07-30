@@ -9,6 +9,7 @@ import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.data.StudentCourseStatus;
 
 @MybatisTest
 class StudentRepositoryTest {
@@ -121,6 +122,8 @@ class StudentRepositoryTest {
     assertThat(actual.getArea()).isEqualTo("奈良県");
     assertThat(actual.getAge()).isEqualTo(36);
     assertThat(actual.getSex()).isEqualTo("男性");
+    assertThat(actual.getRemark()).isEmpty();
+    assertThat(actual.isDeleted()).isFalse();
   }
 
   @Test
@@ -161,6 +164,9 @@ class StudentRepositoryTest {
             "test-course-id".equals(course.getId()))
         .findFirst()
         .orElseThrow();
+
+    assertThat(registeredCourse.getId())
+        .isEqualTo("test-course-id");
 
     assertThat(registeredCourse.getStudentId())
         .isEqualTo(studentId);
@@ -211,6 +217,7 @@ class StudentRepositoryTest {
     assertThat(actual.getSex()).isEqualTo("男性");
     assertThat(actual.getRemark())
         .isEqualTo("Repository更新テスト");
+    assertThat(actual.isDeleted()).isTrue();
   }
 
   @Test
@@ -247,7 +254,105 @@ class StudentRepositoryTest {
     assertThat(updatedCourse.getId())
         .isEqualTo(courseId);
 
+    assertThat(updatedCourse.getStudentId())
+        .isEqualTo(studentId);
+
     assertThat(updatedCourse.getCourseName())
         .isEqualTo("データベース応用");
+  }
+
+  @Test
+  void 受講生コースIDに紐づく申込状況を検索できること() {
+
+    String studentCourseId =
+        "20e961da-5517-4d61-8a63-d85b3561bfdd";
+
+    StudentCourseStatus actual =
+        sut.searchStudentCourseStatus(studentCourseId);
+
+    assertThat(actual).isNotNull();
+
+    assertThat(actual.getId())
+        .isEqualTo("11111111-1111-1111-1111-111111111111");
+
+    assertThat(actual.getStudentCourseId())
+        .isEqualTo(studentCourseId);
+
+    assertThat(actual.getStatus())
+        .isEqualTo("受講中");
+  }
+
+  @Test
+  void 申込状況の登録が行えること() {
+
+    String studentCourseId = "test-course-status-id";
+    String statusId =
+        "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+
+    StudentCourse studentCourse = new StudentCourse();
+    studentCourse.setId(studentCourseId);
+    studentCourse.setStudentId(
+        "61e9a148-4fea-4735-8065-0539daa9f3fc");
+    studentCourse.setCourseName("申込状況テスト");
+    studentCourse.setCourseStartAt(
+        LocalDateTime.of(2026, 8, 1, 9, 0));
+    studentCourse.setCourseEndAt(
+        LocalDateTime.of(2027, 8, 1, 9, 0));
+
+    sut.registerStudentCourse(studentCourse);
+
+    StudentCourseStatus studentCourseStatus =
+        new StudentCourseStatus();
+
+    studentCourseStatus.setId(statusId);
+    studentCourseStatus.setStudentCourseId(studentCourseId);
+    studentCourseStatus.setStatus("仮申込");
+
+    sut.registerStudentCourseStatus(studentCourseStatus);
+
+    StudentCourseStatus actual =
+        sut.searchStudentCourseStatus(studentCourseId);
+
+    assertThat(actual).isNotNull();
+
+    assertThat(actual.getId())
+        .isEqualTo(statusId);
+
+    assertThat(actual.getStudentCourseId())
+        .isEqualTo(studentCourseId);
+
+    assertThat(actual.getStatus())
+        .isEqualTo("仮申込");
+  }
+
+  @Test
+  void 申込状況の更新が行えること() {
+
+    String statusId =
+        "11111111-1111-1111-1111-111111111111";
+
+    String studentCourseId =
+        "20e961da-5517-4d61-8a63-d85b3561bfdd";
+
+    StudentCourseStatus studentCourseStatus =
+        sut.searchStudentCourseStatus(studentCourseId);
+
+    studentCourseStatus.setStatus("受講終了");
+
+    sut.updateStudentCourseStatus(studentCourseStatus);
+
+    StudentCourseStatus actual =
+        sut.searchStudentCourseStatus(studentCourseId);
+
+    assertThat(actual).isNotNull();
+
+    assertThat(actual.getId())
+        .isEqualTo(statusId);
+
+    assertThat(actual.getStudentCourseId())
+        .isEqualTo(studentCourseId);
+
+    assertThat(actual.getStatus())
+        .isEqualTo("受講終了");
   }
 }

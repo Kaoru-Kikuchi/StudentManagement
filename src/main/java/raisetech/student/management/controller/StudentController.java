@@ -24,7 +24,7 @@ import raisetech.student.management.service.StudentService;
  */
 @Tag(
     name = "受講生管理",
-    description = "受講生情報と受講生コース情報の検索、登録、更新を行うAPIです。"
+    description = "受講生情報、受講生コース情報、申込状況の検索、登録、更新を行うAPIです。"
 )
 @Validated
 @RestController
@@ -51,7 +51,7 @@ public class StudentController {
    */
   @Operation(
       summary = "受講生一覧検索",
-      description = "登録されている受講生情報と受講生コース情報を一覧で取得します。"
+      description = "登録されている受講生情報、受講生コース情報、申込状況を一覧で取得します。"
   )
   @ApiResponses({
       @ApiResponse(
@@ -77,7 +77,7 @@ public class StudentController {
    */
   @Operation(
       summary = "受講生詳細検索",
-      description = "指定した受講生IDに紐づく受講生情報と受講生コース情報を取得します。"
+      description = "指定した受講生IDに紐づく受講生情報、受講生コース情報、申込状況を取得します。"
   )
   @ApiResponses({
       @ApiResponse(
@@ -106,7 +106,7 @@ public class StudentController {
    */
   @Operation(
       summary = "受講生登録",
-      description = "受講生情報と受講生コース情報を新規登録します。"
+      description = "受講生情報、受講生コース情報、申込状況を新規登録します。"
   )
   @ApiResponses({
       @ApiResponse(
@@ -141,7 +141,7 @@ public class StudentController {
    */
   @Operation(
       summary = "受講生更新",
-      description = "受講生情報、受講生コース情報およびキャンセルフラグを更新します。"
+      description = "受講生情報、受講生コース情報、申込状況およびキャンセルフラグを更新します。"
   )
   @ApiResponses({
       @ApiResponse(

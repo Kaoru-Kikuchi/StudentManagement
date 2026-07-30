@@ -124,4 +124,41 @@
     WHERE id = #{id}
   </update>
 
+  <!--
+    受講生コースIDに紐づく申込状況を検索します。
+  -->
+  <select id="searchStudentCourseStatus"
+    parameterType="string"
+    resultType="raisetech.student.management.data.StudentCourseStatus">
+    SELECT *
+    FROM students_courses_status
+    WHERE student_course_id = #{studentCourseId}
+  </select>
+
+  <!--
+    申込状況を新規登録します。
+  -->
+  <insert id="registerStudentCourseStatus">
+    INSERT INTO students_courses_status (
+    id,
+    student_course_id,
+    status
+    )
+    VALUES (
+    #{id},
+    #{studentCourseId},
+    #{status}
+    )
+  </insert>
+
+  <!--
+    申込状況を更新します。
+  -->
+  <update id="updateStudentCourseStatus">
+    UPDATE students_courses_status
+    SET
+    status = #{status}
+    WHERE id = #{id}
+  </update>
+
 </mapper>

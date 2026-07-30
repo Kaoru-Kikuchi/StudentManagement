@@ -43,4 +43,9 @@ public class StudentCourse {
       example = "2027-07-01T09:00:00"
   )
   private LocalDateTime courseEndAt;
+
+  @Schema(
+      description = "申込状況"
+  )
+  private StudentCourseStatus studentCourseStatus;
 }

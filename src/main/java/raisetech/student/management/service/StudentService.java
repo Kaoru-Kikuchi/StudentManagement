@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
+import raisetech.student.management.data.StudentCourseStatus;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.repository.StudentRepository;
 
@@ -39,14 +40,18 @@ public class StudentService {
 
   /**
    * 受講生詳細の一覧検索です。
-   * 受講生情報と受講生コース情報を取得し、受講生詳細一覧に変換します。
+   * 受講生情報、受講生コース情報、申込状況を取得し、
+   * 受講生詳細一覧に変換します。
    *
    * @return 受講生詳細一覧
    */
   public List<StudentDetail> searchStudentList() {
     List<Student> studentList = repository.search();
+
     List<StudentCourse> studentCourseList =
         repository.searchStudentCourseList();
+
+    setStudentCourseStatus(studentCourseList);
 
     return converter.convertStudentDetails(
         studentList,
@@ -55,7 +60,7 @@ public class StudentService {
 
   /**
    * 受講生詳細検索です。
-   * IDに紐づく受講生情報と受講生コース情報を取得します。
+   * IDに紐づく受講生情報、受講生コース情報、申込状況を取得します。
    *
    * @param id 受講生ID
    * @return 受講生詳細
@@ -66,13 +71,14 @@ public class StudentService {
     List<StudentCourse> studentCourseList =
         repository.searchStudentCourseListByStudentId(student.getId());
 
+    setStudentCourseStatus(studentCourseList);
+
     return new StudentDetail(student, studentCourseList);
   }
 
   /**
    * 受講生詳細の登録を行います。
-   * 受講生と受講生コース情報を個別に登録し、
-   * 受講生コース情報に受講生ID、コース開始日、コース終了日を設定します。
+   * 受講生、受講生コース情報、申込状況を個別に登録します。
    *
    * @param studentDetail 受講生詳細
    * @return 登録情報を設定した受講生詳細
@@ -86,8 +92,25 @@ public class StudentService {
 
     studentDetail.getStudentCourseList().forEach(studentCourse -> {
       studentCourse.setId(UUID.randomUUID().toString());
+
       initStudentCourse(studentCourse, student);
+
       repository.registerStudentCourse(studentCourse);
+
+      StudentCourseStatus studentCourseStatus =
+          studentCourse.getStudentCourseStatus();
+      if (studentCourseStatus == null) {
+        studentCourseStatus = new StudentCourseStatus();
+        studentCourseStatus.setStatus("仮申込");
+        studentCourse.setStudentCourseStatus(studentCourseStatus);
+      }
+
+      initStudentCourseStatus(
+          studentCourseStatus,
+          studentCourse);
+
+      repository.registerStudentCourseStatus(
+          studentCourseStatus);
     });
 
     return studentDetail;
@@ -111,16 +134,60 @@ public class StudentService {
   }
 
   /**
+   * 申込状況の登録に必要な初期情報を設定します。
+   *
+   * @param studentCourseStatus 申込状況
+   * @param studentCourse 受講生コース情報
+   */
+  private void initStudentCourseStatus(
+      StudentCourseStatus studentCourseStatus,
+      StudentCourse studentCourse) {
+
+    studentCourseStatus.setId(
+        UUID.randomUUID().toString());
+
+    studentCourseStatus.setStudentCourseId(
+        studentCourse.getId());
+  }
+
+  /**
+   * 各受講生コースに申込状況を設定します。
+   *
+   * @param studentCourseList 受講生コース情報一覧
+   */
+  private void setStudentCourseStatus(
+      List<StudentCourse> studentCourseList) {
+
+    studentCourseList.forEach(studentCourse -> {
+      StudentCourseStatus studentCourseStatus =
+          repository.searchStudentCourseStatus(
+              studentCourse.getId());
+
+      studentCourse.setStudentCourseStatus(
+          studentCourseStatus);
+    });
+  }
+
+  /**
    * 受講生詳細の更新を行います。
-   * 受講生と受講生コース情報をそれぞれ更新します。
+   * 受講生、受講生コース情報、申込状況をそれぞれ更新します。
    *
    * @param studentDetail 受講生詳細
    */
   @Transactional
   public void updateStudent(StudentDetail studentDetail) {
-    repository.updateStudent(studentDetail.getStudent());
+    repository.updateStudent(
+        studentDetail.getStudent());
 
     studentDetail.getStudentCourseList()
-        .forEach(repository::updateStudentCourse);
+        .forEach(studentCourse -> {
+          repository.updateStudentCourse(
+              studentCourse);
+
+          if (studentCourse.getStudentCourseStatus() != null) {
+            repository.updateStudentCourseStatus(
+                studentCourse.getStudentCourseStatus());
+          }
+        });
   }
 }
